@@ -1,30 +1,38 @@
-
 const parseResume = require("../services/resumeParser");
 const { extractSkills, extractSkillsFromJD } = require("../services/skillExtractor");
 const matchSkills = require("../services/matcher");
-const extractName = require("../services/nameExtractor"); 
+const extractName = require("../services/nameExtractor");
 
 const matchResume = async (req, res) => {
   try {
     const jdText = req.body.jobDescription;
-    const filePath = req.file.path;
 
-    // resume parsing
-    const resumeText = await parseResume(filePath);
+
+    const fileBuffer = req.file.buffer;
+
+    if (!fileBuffer) {
+      return res.status(400).json({ message: "Resume file missing" });
+    }
 
     
+    const resumeText = await parseResume(fileBuffer);
+
+    // extract name
     const name = extractName(resumeText);
 
+    // extract skills
     const resumeSkills = extractSkills(resumeText);
 
-    // extract skills ONLY from JD
+    // extract skills from JD
     const jdSkills = extractSkillsFromJD(jdText);
 
     // matching
     const matchResult = matchSkills(resumeSkills, jdSkills);
-  console.log("Match Result:", name); // 
+
+    console.log("Candidate Name:", name);
+
     res.json({
-      name: name, 
+      name,
       resumeSkills,
       jdSkills,
       matchingJobs: [
@@ -38,15 +46,18 @@ const matchResume = async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("Error:", error);
     res.status(500).json({ message: "Error processing request" });
   }
 };
 
 module.exports = { matchResume };
+
+
 // const parseResume = require("../services/resumeParser");
 // const { extractSkills, extractSkillsFromJD } = require("../services/skillExtractor");
 // const matchSkills = require("../services/matcher");
+// const extractName = require("../services/nameExtractor"); 
 
 // const matchResume = async (req, res) => {
 //   try {
@@ -55,6 +66,10 @@ module.exports = { matchResume };
 
 //     // resume parsing
 //     const resumeText = await parseResume(filePath);
+
+    
+//     const name = extractName(resumeText);
+
 //     const resumeSkills = extractSkills(resumeText);
 
 //     // extract skills ONLY from JD
@@ -62,11 +77,11 @@ module.exports = { matchResume };
 
 //     // matching
 //     const matchResult = matchSkills(resumeSkills, jdSkills);
-
+//   console.log("Match Result:", name); // 
 //     res.json({
-//       name: "Candidate",
+//       name: name, 
 //       resumeSkills,
-//       jdSkills, 
+//       jdSkills,
 //       matchingJobs: [
 //         {
 //           jobId: "JD001",
@@ -84,3 +99,43 @@ module.exports = { matchResume };
 // };
 
 // module.exports = { matchResume };
+// // const parseResume = require("../services/resumeParser");
+// // const { extractSkills, extractSkillsFromJD } = require("../services/skillExtractor");
+// // const matchSkills = require("../services/matcher");
+
+// // const matchResume = async (req, res) => {
+// //   try {
+// //     const jdText = req.body.jobDescription;
+// //     const filePath = req.file.path;
+
+// //     // resume parsing
+// //     const resumeText = await parseResume(filePath);
+// //     const resumeSkills = extractSkills(resumeText);
+
+// //     // extract skills ONLY from JD
+// //     const jdSkills = extractSkillsFromJD(jdText);
+
+// //     // matching
+// //     const matchResult = matchSkills(resumeSkills, jdSkills);
+
+// //     res.json({
+// //       name: "Candidate",
+// //       resumeSkills,
+// //       jdSkills, 
+// //       matchingJobs: [
+// //         {
+// //           jobId: "JD001",
+// //           role: "Software Developer",
+// //           skillsAnalysis: matchResult.skillsAnalysis,
+// //           matchingScore: matchResult.matchingScore,
+// //         },
+// //       ],
+// //     });
+
+// //   } catch (error) {
+// //     console.error(error);
+// //     res.status(500).json({ message: "Error processing request" });
+// //   }
+// // };
+
+// // module.exports = { matchResume };
