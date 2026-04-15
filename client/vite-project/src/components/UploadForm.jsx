@@ -18,10 +18,10 @@ const UploadForm = ({ setResult }) => {
     try {
       setLoading(true);
 
-      const res = await fetch("http://localhost:5000/api/match", {
-        method: "POST",
-        body: formData,
-      });
+    const res = await fetch("https://resumeparser-l1w9.onrender.com/api/match", {
+  method: "POST",
+  body: formData,
+});
 
       const data = await res.json();
 
